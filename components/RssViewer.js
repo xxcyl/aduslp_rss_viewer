@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Search, SortAsc, SortDesc, Moon, Sun } from 'lucide-react';
+import { Search, SortAsc, SortDesc } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -18,8 +18,8 @@ const RssViewer = () => {
   const [sortOrder, setSortOrder] = useState('desc');
   const [totalEntries, setTotalEntries] = useState(0);
   const [uniqueSources, setUniqueSources] = useState([]);
+  const [filteredSources, setFilteredSources] = useState([]);
   const [selectedSource, setSelectedSource] = useState('');
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [dateRange, setDateRange] = useState('');
 
   useEffect(() => {
@@ -40,6 +40,7 @@ const RssViewer = () => {
 
       const uniqueSources = [...new Set(sources.map(s => s.source))];
       setUniqueSources(uniqueSources);
+      setFilteredSources(uniqueSources);
       setTotalEntries(sources.length);
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -75,14 +76,18 @@ const RssViewer = () => {
       }
 
       const { data, count, error } = await query
-        .order('published', { ascending: sortOrder === 'asc' })
-        .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
+        .order('published', { ascending: sortOrder === 'asc' });
 
       if (error) throw error;
 
-      setEntries(data || []);
-      setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
+      const filteredSources = [...new Set(data.map(entry => entry.source))];
+      setFilteredSources(filteredSources);
       setTotalEntries(count || 0);
+      setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
+
+      // 只獲取當前頁面的條目
+      const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+      setEntries(data.slice(startIndex, startIndex + ITEMS_PER_PAGE));
     } catch (error) {
       console.error('Error fetching entries:', error);
       setError(`獲取文章失敗: ${error.message}`);
@@ -106,32 +111,20 @@ const RssViewer = () => {
     setCurrentPage(1);
   };
 
-  const toggleDarkMode = () => {
-    setIsDarkMode(!isDarkMode);
-  };
-
   const handleDateRangeChange = (range) => {
     setDateRange(range === dateRange ? '' : range);
     setCurrentPage(1);
   };
 
   return (
-    <div className={`container mx-auto px-2 sm:px-4 py-8 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'}`}>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold">
-          📚 聽語期刊速報
-        </h1>
-        <button
-          onClick={toggleDarkMode}
-          className={`p-2 rounded-full ${isDarkMode ? 'bg-yellow-400 text-gray-900' : 'bg-gray-800 text-yellow-400'}`}
-        >
-          {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </button>
-      </div>
+    <div className="container mx-auto px-2 sm:px-4 py-8 bg-gray-100">
+      <h1 className="text-2xl md:text-3xl font-bold mb-8 text-center text-gray-800">
+        📚 聽語期刊速報
+      </h1>
       
       <div className="mb-4 text-center">
-        <p className="text-sm md:text-base">
-          共有 {uniqueSources.length} 個期刊，共 {totalEntries} 篇文章
+        <p className="text-sm md:text-base text-gray-600">
+          共有 {filteredSources.length} 個期刊，共 {totalEntries} 篇文章
         </p>
       </div>
 
