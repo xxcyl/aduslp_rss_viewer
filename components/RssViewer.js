@@ -33,30 +33,23 @@ const RssViewer = () => {
     try {
       setDebugInfo('開始獲取統計資料...');
 
-      // 獲取唯一的來源（期刊）
+      // 獲取所有文章的來源
       const { data: sources, error: sourcesError } = await supabase
         .from('rss_entries')
-        .select('source')
-        .distinct();
+        .select('source');
 
       if (sourcesError) {
         throw new Error(`獲取來源錯誤: ${sourcesError.message}`);
       }
 
+      // 在前端處理去重
+      const uniqueSources = [...new Set(sources.map(s => s.source))];
       setDebugInfo(prevInfo => prevInfo + '\n成功獲取來源');
-      setUniqueSources(sources.map(s => s.source));
+      setUniqueSources(uniqueSources);
 
-      // 獲取總條目數
-      const { count, error: countError } = await supabase
-        .from('rss_entries')
-        .select('*', { count: 'exact', head: true });
-
-      if (countError) {
-        throw new Error(`獲取總數錯誤: ${countError.message}`);
-      }
-
+      // 設置總條目數
       setDebugInfo(prevInfo => prevInfo + '\n成功獲取總數');
-      setTotalEntries(count || 0);
+      setTotalEntries(sources.length);
 
     } catch (error) {
       console.error('Error fetching stats:', error);
