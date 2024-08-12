@@ -19,10 +19,11 @@ const RssViewer = () => {
   const [totalEntries, setTotalEntries] = useState(0);
   const [uniqueSources, setUniqueSources] = useState([]);
   const [selectedSource, setSelectedSource] = useState('');
+  const [debugInfo, setDebugInfo] = useState('');
 
   useEffect(() => {
     fetchStats();
-  }, []); // 僅在組件掛載時執行一次
+  }, []);
 
   useEffect(() => {
     fetchEntries();
@@ -30,14 +31,19 @@ const RssViewer = () => {
 
   const fetchStats = async () => {
     try {
+      setDebugInfo('開始獲取統計資料...');
+
       // 獲取唯一的來源（期刊）
       const { data: sources, error: sourcesError } = await supabase
         .from('rss_entries')
         .select('source')
         .distinct();
 
-      if (sourcesError) throw sourcesError;
+      if (sourcesError) {
+        throw new Error(`獲取來源錯誤: ${sourcesError.message}`);
+      }
 
+      setDebugInfo(prevInfo => prevInfo + '\n成功獲取來源');
       setUniqueSources(sources.map(s => s.source));
 
       // 獲取總條目數
@@ -45,18 +51,25 @@ const RssViewer = () => {
         .from('rss_entries')
         .select('*', { count: 'exact', head: true });
 
-      if (countError) throw countError;
+      if (countError) {
+        throw new Error(`獲取總數錯誤: ${countError.message}`);
+      }
 
+      setDebugInfo(prevInfo => prevInfo + '\n成功獲取總數');
       setTotalEntries(count || 0);
+
     } catch (error) {
       console.error('Error fetching stats:', error);
-      setError('Failed to fetch statistics');
+      setError(`獲取統計資料失敗: ${error.message}`);
+      setDebugInfo(prevInfo => prevInfo + `\n錯誤: ${error.message}`);
     }
   };
 
   const fetchEntries = async () => {
     try {
       setLoading(true);
+      setDebugInfo(prevInfo => prevInfo + '\n開始獲取文章...');
+
       let query = supabase
         .from('rss_entries')
         .select('*', { count: 'exact' });
@@ -77,9 +90,11 @@ const RssViewer = () => {
 
       setEntries(data || []);
       setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
+      setDebugInfo(prevInfo => prevInfo + `\n成功獲取文章: ${data ? data.length : 0} 篇`);
     } catch (error) {
       console.error('Error fetching entries:', error);
-      setError('Failed to fetch entries');
+      setError(`獲取文章失敗: ${error.message}`);
+      setDebugInfo(prevInfo => prevInfo + `\n錯誤: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -98,6 +113,18 @@ const RssViewer = () => {
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-100">
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">最新 RSS 文章</h1>
+      
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
+          錯誤: {error}
+        </div>
+      )}
+      
+      {debugInfo && (
+        <div className="mb-4 p-4 bg-gray-100 border border-gray-300 text-gray-700 rounded">
+          <pre>{debugInfo}</pre>
+        </div>
+      )}
       
       <div className="mb-4 text-center">
         <p className="text-gray-600">共有 {uniqueSources.length} 個期刊，{totalEntries} 篇文章</p>
@@ -144,10 +171,8 @@ const RssViewer = () => {
         </div>
       )}
       
-      {error && <div className="text-center p-4 text-red-500">Error: {error}</div>}
-      
       {!loading && entries.length === 0 && (
-        <div className="text-center p-4 text-gray-600">No entries found.</div>
+        <div className="text-center p-4 text-gray-600">未找到文章。</div>
       )}
 
       <div className="space-y-4">
