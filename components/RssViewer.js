@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Search, SortAsc, SortDesc } from 'lucide-react';
+import { Search, SortAsc, SortDesc, Moon, Sun } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -19,6 +19,8 @@ const RssViewer = () => {
   const [totalEntries, setTotalEntries] = useState(0);
   const [uniqueSources, setUniqueSources] = useState([]);
   const [selectedSource, setSelectedSource] = useState('');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [dateRange, setDateRange] = useState('');
 
   useEffect(() => {
     fetchStats();
@@ -26,7 +28,7 @@ const RssViewer = () => {
 
   useEffect(() => {
     fetchEntries();
-  }, [currentPage, searchTerm, sortOrder, selectedSource]);
+  }, [currentPage, searchTerm, sortOrder, selectedSource, dateRange]);
 
   const fetchStats = async () => {
     try {
@@ -34,21 +36,15 @@ const RssViewer = () => {
         .from('rss_entries')
         .select('source');
 
-      if (sourcesError) {
-        throw new Error(`獲取來源錯誤: ${sourcesError.message}`);
-      }
+      if (sourcesError) throw sourcesError;
 
       const uniqueSources = [...new Set(sources.map(s => s.source))];
       setUniqueSources(uniqueSources);
-      updateTotalEntries(sources.length);
+      setTotalEntries(sources.length);
     } catch (error) {
       console.error('Error fetching stats:', error);
       setError(`獲取統計資料失敗: ${error.message}`);
     }
-  };
-
-  const updateTotalEntries = (count) => {
-    setTotalEntries(count);
   };
 
   const fetchEntries = async () => {
@@ -67,6 +63,17 @@ const RssViewer = () => {
         query = query.eq('source', selectedSource);
       }
 
+      if (dateRange) {
+        const currentDate = new Date();
+        let startDate;
+        if (dateRange === 'week') {
+          startDate = new Date(currentDate.getTime() - 7 * 24 * 60 * 60 * 1000);
+        } else if (dateRange === 'month') {
+          startDate = new Date(currentDate.getTime() - 30 * 24 * 60 * 60 * 1000);
+        }
+        query = query.gte('published', startDate.toISOString());
+      }
+
       const { data, count, error } = await query
         .order('published', { ascending: sortOrder === 'asc' })
         .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
@@ -75,7 +82,7 @@ const RssViewer = () => {
 
       setEntries(data || []);
       setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
-      updateTotalEntries(count || 0);
+      setTotalEntries(count || 0);
     } catch (error) {
       console.error('Error fetching entries:', error);
       setError(`獲取文章失敗: ${error.message}`);
@@ -99,14 +106,31 @@ const RssViewer = () => {
     setCurrentPage(1);
   };
 
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
+
+  const handleDateRangeChange = (range) => {
+    setDateRange(range === dateRange ? '' : range);
+    setCurrentPage(1);
+  };
+
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-8 bg-gray-100">
-      <h1 className="text-2xl md:text-3xl font-bold mb-8 text-center text-gray-800">
-        📚 聽語期刊速報
-      </h1>
+    <div className={`container mx-auto px-2 sm:px-4 py-8 ${isDarkMode ? 'bg-gray-900 text-white' : 'bg-gray-100 text-gray-800'}`}>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold">
+          📚 聽語期刊速報
+        </h1>
+        <button
+          onClick={toggleDarkMode}
+          className={`p-2 rounded-full ${isDarkMode ? 'bg-yellow-400 text-gray-900' : 'bg-gray-800 text-yellow-400'}`}
+        >
+          {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </button>
+      </div>
       
       <div className="mb-4 text-center">
-        <p className="text-sm md:text-base text-gray-600">
+        <p className="text-sm md:text-base">
           共有 {uniqueSources.length} 個期刊，共 {totalEntries} 篇文章
         </p>
       </div>
@@ -145,6 +169,29 @@ const RssViewer = () => {
           >
             {sortOrder === 'asc' ? <SortAsc className="w-4 h-4 mr-1" /> : <SortDesc className="w-4 h-4 mr-1" />}
             {sortOrder === 'asc' ? '升序' : '降序'}
+          </button>
+        </div>
+
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+          <button
+            onClick={() => handleDateRangeChange('week')}
+            className={`w-full sm:w-auto p-2 text-sm rounded-lg focus:ring-2 focus:outline-none ${
+              dateRange === 'week'
+                ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-400'
+            }`}
+          >
+            最近一周
+          </button>
+          <button
+            onClick={() => handleDateRangeChange('month')}
+            className={`w-full sm:w-auto p-2 text-sm rounded-lg focus:ring-2 focus:outline-none ${
+              dateRange === 'month'
+                ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-400'
+            }`}
+          >
+            最近一月
           </button>
         </div>
       </div>
