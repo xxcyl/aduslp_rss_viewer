@@ -19,7 +19,6 @@ const RssViewer = () => {
   const [totalEntries, setTotalEntries] = useState(0);
   const [uniqueSources, setUniqueSources] = useState([]);
   const [selectedSource, setSelectedSource] = useState('');
-  const [debugInfo, setDebugInfo] = useState('');
 
   useEffect(() => {
     fetchStats();
@@ -31,9 +30,6 @@ const RssViewer = () => {
 
   const fetchStats = async () => {
     try {
-      setDebugInfo('開始獲取統計資料...');
-
-      // 獲取所有文章的來源
       const { data: sources, error: sourcesError } = await supabase
         .from('rss_entries')
         .select('source');
@@ -42,26 +38,18 @@ const RssViewer = () => {
         throw new Error(`獲取來源錯誤: ${sourcesError.message}`);
       }
 
-      // 在前端處理去重
       const uniqueSources = [...new Set(sources.map(s => s.source))];
-      setDebugInfo(prevInfo => prevInfo + '\n成功獲取來源');
       setUniqueSources(uniqueSources);
-
-      // 設置總條目數
-      setDebugInfo(prevInfo => prevInfo + '\n成功獲取總數');
       setTotalEntries(sources.length);
-
     } catch (error) {
       console.error('Error fetching stats:', error);
       setError(`獲取統計資料失敗: ${error.message}`);
-      setDebugInfo(prevInfo => prevInfo + `\n錯誤: ${error.message}`);
     }
   };
 
   const fetchEntries = async () => {
     try {
       setLoading(true);
-      setDebugInfo(prevInfo => prevInfo + '\n開始獲取文章...');
 
       let query = supabase
         .from('rss_entries')
@@ -83,11 +71,9 @@ const RssViewer = () => {
 
       setEntries(data || []);
       setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
-      setDebugInfo(prevInfo => prevInfo + `\n成功獲取文章: ${data ? data.length : 0} 篇`);
     } catch (error) {
       console.error('Error fetching entries:', error);
       setError(`獲取文章失敗: ${error.message}`);
-      setDebugInfo(prevInfo => prevInfo + `\n錯誤: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -110,12 +96,6 @@ const RssViewer = () => {
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           錯誤: {error}
-        </div>
-      )}
-      
-      {debugInfo && (
-        <div className="mb-4 p-4 bg-gray-100 border border-gray-300 text-gray-700 rounded">
-          <pre>{debugInfo}</pre>
         </div>
       )}
       
