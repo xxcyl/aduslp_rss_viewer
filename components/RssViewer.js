@@ -101,7 +101,15 @@ const RssViewer = () => {
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-8 bg-gray-100">
-      <h1 className="text-2xl md:text-3xl font-bold mb-4 text-center text-gray-800">最新 RSS 文章</h1>
+      <h1 className="text-2xl md:text-3xl font-bold mb-4 text-center text-gray-800">
+        📚 聽語期刊速報
+      </h1>
+      
+      <div className="mb-6 p-4 bg-yellow-100 border border-yellow-400 text-yellow-700 rounded">
+        <p className="text-sm md:text-base">
+          <strong>⚠️ 警告：</strong>請注意，AI 處理生成的 TL;DR 摘要和中文翻譯可能存在錯誤或不準確之處。為確保資訊的準確性，我們強烈建議您參考原文內容。這些 AI 生成的內容僅供快速瀏覽參考，不應替代對原始研究論文的仔細閱讀和理解。
+        </p>
+      </div>
       
       <div className="mb-4 text-center">
         <p className="text-sm md:text-base text-gray-600">
@@ -174,7 +182,7 @@ const RssViewer = () => {
                 {entry.title_translated}
               </h3>
               <p className="text-xs md:text-sm text-amber-500 mb-2">發布日期: {new Date(entry.published).toLocaleDateString('zh-TW')}</p>
-              <p className="text-xs md:text-sm text-gray-600 mb-4">
+              <p className="text-sm text-gray-600 mb-4">
                 {entry.tldr}
               </p>
               <div className="text-xs text-gray-500 flex items-center space-x-2">
