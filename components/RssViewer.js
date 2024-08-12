@@ -40,11 +40,15 @@ const RssViewer = () => {
 
       const uniqueSources = [...new Set(sources.map(s => s.source))];
       setUniqueSources(uniqueSources);
-      setTotalEntries(sources.length);
+      updateTotalEntries(sources.length);
     } catch (error) {
       console.error('Error fetching stats:', error);
       setError(`獲取統計資料失敗: ${error.message}`);
     }
+  };
+
+  const updateTotalEntries = (count) => {
+    setTotalEntries(count);
   };
 
   const fetchEntries = async () => {
@@ -71,6 +75,7 @@ const RssViewer = () => {
 
       setEntries(data || []);
       setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
+      updateTotalEntries(count || 0);
     } catch (error) {
       console.error('Error fetching entries:', error);
       setError(`獲取文章失敗: ${error.message}`);
@@ -89,6 +94,11 @@ const RssViewer = () => {
     setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
   };
 
+  const handleSourceChange = (e) => {
+    setSelectedSource(e.target.value);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-100">
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">最新 RSS 文章</h1>
@@ -100,7 +110,10 @@ const RssViewer = () => {
       )}
       
       <div className="mb-4 text-center">
-        <p className="text-gray-600">共有 {uniqueSources.length} 個期刊，{totalEntries} 篇文章</p>
+        <p className="text-gray-600">
+          共有 {uniqueSources.length} 個期刊
+          {selectedSource ? `，當前顯示 "${selectedSource}" 的` : '，共'} {totalEntries} 篇文章
+        </p>
       </div>
 
       <div className="flex mb-6 space-x-4">
@@ -121,7 +134,7 @@ const RssViewer = () => {
 
         <select
           value={selectedSource}
-          onChange={(e) => setSelectedSource(e.target.value)}
+          onChange={handleSourceChange}
           className="p-4 text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="">所有期刊</option>
