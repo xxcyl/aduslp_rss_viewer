@@ -212,20 +212,23 @@ const RssViewer = () => {
               <h2 className="text-base md:text-lg font-semibold mb-2 text-pink-600">
                 {entry.title}
               </h2>
-              <h3 className="text-sm md:text-md mb-2 text-gray-700">
+              <h3 className="text-sm md:text-md mb-2 text-gray-800 font-bold">
                 {entry.title_translated}
               </h3>
-              <p className="text-xs md:text-sm text-amber-500 mb-2">發布日期: {new Date(entry.published).toLocaleDateString('zh-TW')}</p>
               <p className="text-sm text-gray-600 mb-4">
                 {entry.tldr}
               </p>
-              <div className="text-xs text-gray-500 flex items-center space-x-2">
+              <div className="text-xs text-gray-500 flex items-center flex-wrap">
                 <a href={`https://pubmed.ncbi.nlm.nih.gov/${entry.pmid}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                   PubMed
                 </a>
-                <span>•</span>
+                <span className="mx-1">•</span>
                 <span className="text-green-600">
                   {entry.source}
+                </span>
+                <span className="mx-1">•</span>
+                <span className="text-amber-500">
+                  發布日期: {new Date(entry.published).toLocaleDateString('zh-TW')}
                 </span>
               </div>
             </div>
