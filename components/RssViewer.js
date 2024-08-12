@@ -94,9 +94,8 @@ const RssViewer = () => {
               <h3 className="text-md mb-2 text-gray-700">
                 {entry.title_translated}
               </h3>
-              <p className="text-sm text-gray-500 mb-2">發布日期: {new Date(entry.published).toLocaleDateString('zh-TW')}</p>
+              <p className="text-sm text-amber-500 mb-2">發布日期: {new Date(entry.published).toLocaleDateString('zh-TW')}</p>
               <p className="text-sm text-gray-600 mb-4">
-                <span className="font-semibold text-amber-500">TL;DR: </span>
                 {entry.tldr}
               </p>
               <div className="text-xs text-gray-500 flex items-center space-x-2">
