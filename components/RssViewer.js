@@ -21,30 +21,36 @@ const RssViewer = () => {
   const [selectedSource, setSelectedSource] = useState('');
 
   useEffect(() => {
-    fetchEntries();
     fetchStats();
+  }, []); // 僅在組件掛載時執行一次
+
+  useEffect(() => {
+    fetchEntries();
   }, [currentPage, searchTerm, sortOrder, selectedSource]);
 
   const fetchStats = async () => {
-    const { data: sources, error: sourcesError } = await supabase
-      .from('rss_entries')
-      .select('source', { count: 'exact' })
-      .distinct();
+    try {
+      // 獲取唯一的來源（期刊）
+      const { data: sources, error: sourcesError } = await supabase
+        .from('rss_entries')
+        .select('source')
+        .distinct();
 
-    if (sourcesError) {
-      console.error('Error fetching sources:', sourcesError);
-    } else {
+      if (sourcesError) throw sourcesError;
+
       setUniqueSources(sources.map(s => s.source));
-    }
 
-    const { count, error: countError } = await supabase
-      .from('rss_entries')
-      .select('*', { count: 'exact' });
+      // 獲取總條目數
+      const { count, error: countError } = await supabase
+        .from('rss_entries')
+        .select('*', { count: 'exact', head: true });
 
-    if (countError) {
-      console.error('Error fetching total count:', countError);
-    } else {
-      setTotalEntries(count);
+      if (countError) throw countError;
+
+      setTotalEntries(count || 0);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      setError('Failed to fetch statistics');
     }
   };
 
@@ -69,11 +75,11 @@ const RssViewer = () => {
 
       if (error) throw error;
 
-      setEntries(data);
-      setTotalPages(Math.ceil(count / ITEMS_PER_PAGE));
+      setEntries(data || []);
+      setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
     } catch (error) {
-      setError('Failed to fetch entries');
       console.error('Error fetching entries:', error);
+      setError('Failed to fetch entries');
     } finally {
       setLoading(false);
     }
