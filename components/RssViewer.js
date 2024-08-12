@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Search } from 'lucide-react';
+import { Search, SortAsc, SortDesc } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -15,10 +15,38 @@ const RssViewer = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
+  const [sortOrder, setSortOrder] = useState('desc');
+  const [totalEntries, setTotalEntries] = useState(0);
+  const [uniqueSources, setUniqueSources] = useState([]);
+  const [selectedSource, setSelectedSource] = useState('');
 
   useEffect(() => {
     fetchEntries();
-  }, [currentPage, searchTerm]);
+    fetchStats();
+  }, [currentPage, searchTerm, sortOrder, selectedSource]);
+
+  const fetchStats = async () => {
+    const { data: sources, error: sourcesError } = await supabase
+      .from('rss_entries')
+      .select('source', { count: 'exact' })
+      .distinct();
+
+    if (sourcesError) {
+      console.error('Error fetching sources:', sourcesError);
+    } else {
+      setUniqueSources(sources.map(s => s.source));
+    }
+
+    const { count, error: countError } = await supabase
+      .from('rss_entries')
+      .select('*', { count: 'exact' });
+
+    if (countError) {
+      console.error('Error fetching total count:', countError);
+    } else {
+      setTotalEntries(count);
+    }
+  };
 
   const fetchEntries = async () => {
     try {
@@ -31,8 +59,12 @@ const RssViewer = () => {
         query = query.or(`title.ilike.%${searchTerm}%,title_translated.ilike.%${searchTerm}%,tldr.ilike.%${searchTerm}%`);
       }
 
+      if (selectedSource) {
+        query = query.eq('source', selectedSource);
+      }
+
       const { data, count, error } = await query
-        .order('published', { ascending: false })
+        .order('published', { ascending: sortOrder === 'asc' })
         .range((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE - 1);
 
       if (error) throw error;
@@ -53,24 +85,52 @@ const RssViewer = () => {
     fetchEntries();
   };
 
+  const toggleSortOrder = () => {
+    setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-100">
       <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">最新 RSS 文章</h1>
       
-      <form onSubmit={handleSearch} className="mb-6">
-        <div className="relative">
-          <input
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="搜索文章..."
-            className="w-full p-4 pr-12 text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
-          />
-          <button type="submit" className="absolute right-2.5 bottom-2.5 bg-blue-600 text-white rounded-lg text-sm px-4 py-2 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
-            <Search className="w-5 h-5" />
-          </button>
-        </div>
-      </form>
+      <div className="mb-4 text-center">
+        <p className="text-gray-600">共有 {uniqueSources.length} 個期刊，{totalEntries} 篇文章</p>
+      </div>
+
+      <div className="flex mb-6 space-x-4">
+        <form onSubmit={handleSearch} className="flex-grow">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="搜索文章..."
+              className="w-full p-4 pr-12 text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
+            />
+            <button type="submit" className="absolute right-2.5 bottom-2.5 bg-blue-600 text-white rounded-lg text-sm px-4 py-2 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
+              <Search className="w-5 h-5" />
+            </button>
+          </div>
+        </form>
+
+        <select
+          value={selectedSource}
+          onChange={(e) => setSelectedSource(e.target.value)}
+          className="p-4 text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="">所有期刊</option>
+          {uniqueSources.map((source) => (
+            <option key={source} value={source}>{source}</option>
+          ))}
+        </select>
+
+        <button
+          onClick={toggleSortOrder}
+          className="p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300"
+        >
+          {sortOrder === 'asc' ? <SortAsc className="w-5 h-5" /> : <SortDesc className="w-5 h-5" />}
+        </button>
+      </div>
 
       {loading && (
         <div className="flex justify-center items-center h-32">
