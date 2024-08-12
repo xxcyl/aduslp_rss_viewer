@@ -10,6 +10,7 @@ const RssViewer = () => {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [debugInfo, setDebugInfo] = useState('');
 
   useEffect(() => {
     fetchEntries();
@@ -18,6 +19,8 @@ const RssViewer = () => {
   const fetchEntries = async () => {
     try {
       setLoading(true);
+      setDebugInfo('Fetching data from Supabase...');
+      
       const { data, error } = await supabase
         .from('rss_entries')
         .select('*')
@@ -25,21 +28,34 @@ const RssViewer = () => {
         .limit(20);
 
       if (error) throw error;
+      
+      setDebugInfo(`Fetched ${data.length} entries.`);
       setEntries(data);
     } catch (error) {
       setError('Failed to fetch entries');
+      setDebugInfo(`Error: ${error.message}`);
       console.error('Error fetching entries:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading) return <div className="text-center p-4">Loading...</div>;
-  if (error) return <div className="text-center p-4 text-red-500">Error: {error}</div>;
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-center">最新 RSS 文章</h1>
+      
+      {/* Debug Info */}
+      <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+        <p className="font-bold">Debug Info:</p>
+        <p>{debugInfo}</p>
+        <p>Loading: {loading.toString()}</p>
+        <p>Error: {error || 'None'}</p>
+        <p>Entries count: {entries.length}</p>
+      </div>
+
+      {loading && <div className="text-center p-4">Loading...</div>}
+      {error && <div className="text-center p-4 text-red-500">Error: {error}</div>}
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {entries.map((entry) => (
           <div key={entry.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
