@@ -84,17 +84,17 @@ const RssViewer = () => {
         <div className="text-center p-4 text-gray-600">No entries found.</div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6">
         {entries.map((entry) => (
           <div key={entry.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
             <div className="p-6">
-              <h2 className="text-xl font-semibold mb-3 text-gray-800 line-clamp-2">
+              <h2 className="text-xl font-semibold mb-3 text-gray-800">
                 <a href={entry.link} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 transition-colors duration-300">
-                  {entry.title_translated || entry.title}
+                  {entry.title} {entry.title_translated && `| ${entry.title_translated}`}
                 </a>
               </h2>
               <p className="text-sm text-gray-500 mb-3">發布日期: {new Date(entry.published).toLocaleDateString('zh-TW')}</p>
-              <p className="text-sm text-gray-600 line-clamp-3">{entry.tldr}</p>
+              <p className="text-sm text-gray-600">{entry.tldr}</p>
             </div>
           </div>
         ))}
