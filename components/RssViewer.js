@@ -100,7 +100,7 @@ const RssViewer = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-gray-100">
+    <div className="container mx-auto px-2 sm:px-4 py-8 bg-gray-100">
       <h1 className="text-2xl md:text-3xl font-bold mb-8 text-center text-gray-800">最新 RSS 文章</h1>
       
       {error && (
@@ -116,27 +116,27 @@ const RssViewer = () => {
         </p>
       </div>
 
-      <div className="flex flex-col md:flex-row mb-6 space-y-4 md:space-y-0 md:space-x-4">
-        <form onSubmit={handleSearch} className="flex-grow">
+      <div className="flex flex-col space-y-4 mb-6">
+        <form onSubmit={handleSearch} className="w-full">
           <div className="relative">
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="搜索文章..."
-              className="w-full p-3 md:p-4 pr-12 text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
+              className="w-full p-3 pr-12 text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
             />
-            <button type="submit" className="absolute right-2 md:right-2.5 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-lg text-sm px-3 md:px-4 py-2 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
-              <Search className="w-4 h-4 md:w-5 md:h-5" />
+            <button type="submit" className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-lg text-sm px-3 py-2 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300">
+              <Search className="w-4 h-4" />
             </button>
           </div>
         </form>
 
-        <div className="flex space-x-2 md:space-x-4">
+        <div className="flex space-x-2">
           <select
             value={selectedSource}
             onChange={handleSourceChange}
-            className="flex-grow md:flex-grow-0 p-3 md:p-4 text-sm md:text-base text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
+            className="flex-grow p-3 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">所有期刊</option>
             {uniqueSources.map((source) => (
@@ -146,16 +146,16 @@ const RssViewer = () => {
 
           <button
             onClick={toggleSortOrder}
-            className="p-3 md:p-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300"
+            className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300"
           >
-            {sortOrder === 'asc' ? <SortAsc className="w-4 h-4 md:w-5 md:h-5" /> : <SortDesc className="w-4 h-4 md:w-5 md:h-5" />}
+            {sortOrder === 'asc' ? <SortAsc className="w-4 h-4" /> : <SortDesc className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
       {loading && (
         <div className="flex justify-center items-center h-32">
-          <div className="animate-spin rounded-full h-8 w-8 md:h-12 md:w-12 border-b-2 border-gray-900"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
         </div>
       )}
       
@@ -197,7 +197,7 @@ const RssViewer = () => {
             <button
               key={i}
               onClick={() => setCurrentPage(i + 1)}
-              className={`m-1 px-3 py-1 md:px-4 md:py-2 text-sm md:text-base rounded ${
+              className={`m-1 px-3 py-1 text-sm rounded ${
                 currentPage === i + 1
                   ? 'bg-blue-600 text-white'
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
