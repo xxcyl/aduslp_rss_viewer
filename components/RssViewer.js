@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Search, SortAsc, SortDesc } from 'lucide-react';
+import { Search, SortAsc, SortDesc, Tag } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -59,7 +59,7 @@ const RssViewer = () => {
       if (searchTerm) {
         query = query.or(`title.ilike.%${searchTerm}%,title_translated.ilike.%${searchTerm}%,tldr.ilike.%${searchTerm}%,keywords.ilike.%${searchTerm}%`);
       }
-      
+
       if (selectedSource) {
         query = query.eq('source', selectedSource);
       }
@@ -115,6 +115,34 @@ const RssViewer = () => {
     setCurrentPage(1);
   };
 
+  const renderKeywords = (keywordsString) => {
+    if (!keywordsString) return null;
+    
+    let keywords;
+    try {
+      keywords = JSON.parse(keywordsString);
+    } catch (error) {
+      console.error('Failed to parse keywords:', error);
+      return null;
+    }
+
+    if (!Array.isArray(keywords) || keywords.length === 0) return null;
+
+    return (
+      <div className="mt-2 flex flex-wrap items-center gap-1">
+        <Tag className="w-4 h-4 text-gray-500" />
+        {keywords.map((keyword, index) => (
+          <span 
+            key={index} 
+            className="inline-block bg-gray-200 rounded-full px-2 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2"
+          >
+            {keyword}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="container mx-auto px-2 sm:px-4 py-8 bg-gray-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -128,7 +156,7 @@ const RssViewer = () => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="搜索文章..."
+              placeholder="搜索文章或關鍵字..."
               className="w-full sm:w-64 p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
             />
             <button type="submit" className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-lg text-xs px-2 py-1 hover:bg-blue-700 focus:ring-2 focus:outline-none focus:ring-blue-300">
@@ -219,7 +247,8 @@ const RssViewer = () => {
               <p className="text-sm text-gray-600 mb-4">
                 {entry.tldr}
               </p>
-              <div className="text-xs text-gray-500 flex items-center flex-wrap">
+              {renderKeywords(entry.keywords)}
+              <div className="text-xs text-gray-500 flex items-center flex-wrap mt-2">
                 <a href={`https://pubmed.ncbi.nlm.nih.gov/${entry.pmid}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                   PubMed
                 </a>
