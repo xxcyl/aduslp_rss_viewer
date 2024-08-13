@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Search, SortAsc, SortDesc, Tag } from 'lucide-react';
+import { Search, SortAsc, SortDesc, Tag, X } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -21,6 +21,7 @@ const RssViewer = () => {
   const [filteredSources, setFilteredSources] = useState([]);
   const [selectedSource, setSelectedSource] = useState('');
   const [dateRange, setDateRange] = useState('');
+  const [activeKeyword, setActiveKeyword] = useState('');
 
   useEffect(() => {
     fetchStats();
@@ -98,6 +99,7 @@ const RssViewer = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1);
+    setActiveKeyword('');
     fetchEntries();
   };
 
@@ -113,6 +115,20 @@ const RssViewer = () => {
   const handleDateRangeChange = (range) => {
     setDateRange(range === dateRange ? '' : range);
     setCurrentPage(1);
+  };
+
+  const handleKeywordClick = (keyword) => {
+    setSearchTerm(keyword);
+    setActiveKeyword(keyword);
+    setCurrentPage(1);
+    fetchEntries();
+  };
+
+  const clearKeywordSearch = () => {
+    setSearchTerm('');
+    setActiveKeyword('');
+    setCurrentPage(1);
+    fetchEntries();
   };
 
   const renderKeywords = (keywordsString) => {
@@ -132,12 +148,17 @@ const RssViewer = () => {
       <div className="mt-2 flex flex-wrap items-center gap-1">
         <Tag className="w-4 h-4 text-gray-500" />
         {keywords.map((keyword, index) => (
-          <span 
-            key={index} 
-            className="inline-block bg-gray-200 rounded-full px-2 py-1 text-xs font-semibold text-gray-700 mr-2 mb-2"
+          <button
+            key={index}
+            onClick={() => handleKeywordClick(keyword)}
+            className={`inline-block px-2 py-1 text-xs font-semibold rounded-full mr-2 mb-2 ${
+              activeKeyword === keyword
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
           >
             {keyword}
-          </span>
+          </button>
         ))}
       </div>
     );
@@ -150,7 +171,7 @@ const RssViewer = () => {
           📚 聽語期刊速報
         </h1>
         
-        <form onSubmit={handleSearch} className="w-full sm:w-auto">
+        <form onSubmit={handleSearch} className="w-full sm:w-auto relative">
           <div className="relative">
             <input
               type="text"
@@ -163,6 +184,19 @@ const RssViewer = () => {
               <Search className="w-4 h-4" />
             </button>
           </div>
+          {activeKeyword && (
+            <div className="absolute left-0 -bottom-8 flex items-center bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">
+              <span className="mr-1">當前關鍵字:</span>
+              <span className="font-bold">{activeKeyword}</span>
+              <button
+                onClick={clearKeywordSearch}
+                className="ml-1 text-blue-600 hover:text-blue-800"
+                aria-label="清除關鍵字搜索"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
         </form>
       </div>
       
