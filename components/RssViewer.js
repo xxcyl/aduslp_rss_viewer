@@ -28,8 +28,10 @@ const RssViewer = () => {
   }, []);
 
   useEffect(() => {
-    fetchEntries();
-  }, [currentPage, searchTerm, sortOrder, selectedSource, dateRange]);
+    if (!activeKeyword) {
+      fetchEntries();
+    }
+  }, [currentPage, sortOrder, selectedSource, dateRange]);
 
   const fetchStats = async () => {
     try {
@@ -49,7 +51,7 @@ const RssViewer = () => {
     }
   };
 
-  const fetchEntries = async () => {
+  const fetchEntries = async (term = searchTerm) => {
     try {
       setLoading(true);
 
@@ -57,8 +59,8 @@ const RssViewer = () => {
         .from('rss_entries')
         .select('*', { count: 'exact' });
 
-      if (searchTerm) {
-        query = query.or(`title.ilike.%${searchTerm}%,title_translated.ilike.%${searchTerm}%,tldr.ilike.%${searchTerm}%,keywords.ilike.%${searchTerm}%`);
+      if (term) {
+        query = query.or(`title.ilike.%${term}%,title_translated.ilike.%${term}%,tldr.ilike.%${term}%,keywords.ilike.%${term}%`);
       }
 
       if (selectedSource) {
@@ -100,7 +102,7 @@ const RssViewer = () => {
     e.preventDefault();
     setCurrentPage(1);
     setActiveKeyword('');
-    fetchEntries();
+    fetchEntries(searchTerm);
   };
 
   const toggleSortOrder = () => {
@@ -121,14 +123,14 @@ const RssViewer = () => {
     setSearchTerm(keyword);
     setActiveKeyword(keyword);
     setCurrentPage(1);
-    fetchEntries();
+    fetchEntries(keyword);
   };
 
   const clearKeywordSearch = () => {
     setSearchTerm('');
     setActiveKeyword('');
     setCurrentPage(1);
-    fetchEntries();
+    fetchEntries('');
   };
 
   const renderKeywords = (keywordsString) => {
