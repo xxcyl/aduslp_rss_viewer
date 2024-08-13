@@ -22,6 +22,7 @@ const RssViewer = () => {
   const [selectedSource, setSelectedSource] = useState('');
   const [dateRange, setDateRange] = useState('');
   const [selectedKeyword, setSelectedKeyword] = useState('');
+  const [noResults, setNoResults] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -52,6 +53,8 @@ const RssViewer = () => {
   const fetchEntries = async () => {
     try {
       setLoading(true);
+      setError(null);
+      setNoResults(false);
 
       let query = supabase
         .from('rss_entries')
@@ -59,6 +62,10 @@ const RssViewer = () => {
 
       if (searchTerm) {
         query = query.or(`title.ilike.%${searchTerm}%,title_translated.ilike.%${searchTerm}%,tldr.ilike.%${searchTerm}%`);
+      }
+
+      if (selectedKeyword) {
+        query = query.contains('keywords', [selectedKeyword]);
       }
 
       if (selectedSource) {
@@ -76,15 +83,11 @@ const RssViewer = () => {
         query = query.gte('published', startDate.toISOString());
       }
 
-      if (selectedKeyword) {
-        query = query.contains('keywords', [selectedKeyword]);
-      }
-
       console.log('Query parameters:', {
         searchTerm,
+        selectedKeyword,
         selectedSource,
         dateRange,
-        selectedKeyword,
         sortOrder
       });
 
@@ -95,25 +98,36 @@ const RssViewer = () => {
 
       console.log('Fetched data:', data);
 
-      const filteredSources = [...new Set(data.map(entry => entry.source))];
-      setFilteredSources(filteredSources);
-      setTotalEntries(count || 0);
-      setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
+      if (data.length === 0) {
+        setNoResults(true);
+        setEntries([]);
+        setTotalPages(0);
+        setTotalEntries(0);
+      } else {
+        const filteredSources = [...new Set(data.map(entry => entry.source))];
+        setFilteredSources(filteredSources);
+        setTotalEntries(count || 0);
+        setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
 
-      const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-      setEntries(data.slice(startIndex, startIndex + ITEMS_PER_PAGE));
+        const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+        setEntries(data.slice(startIndex, startIndex + ITEMS_PER_PAGE));
+      }
     } catch (error) {
       console.error('Error fetching entries:', error);
-      setError(`獲取文章失敗: ${error.message}`);
+      setError(`獲取文章失敗: ${error.message || '未知錯誤'}`);
     } finally {
       setLoading(false);
     }
   };
 
   const handleSearch = (e) => {
-    e.preventDefault();
-    setCurrentPage(1);
+    setSearchTerm(e.target.value);
     setSelectedKeyword('');
+    setCurrentPage(1);
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
     fetchEntries();
   };
 
@@ -137,7 +151,8 @@ const RssViewer = () => {
     setCurrentPage(1);
   };
 
-  const clearKeywordSearch = () => {
+  const clearSearch = () => {
+    setSearchTerm('');
     setSelectedKeyword('');
     setCurrentPage(1);
   };
@@ -149,12 +164,12 @@ const RssViewer = () => {
           📚 聽語期刊速報
         </h1>
         
-        <form onSubmit={handleSearch} className="w-full sm:w-auto">
+        <form onSubmit={handleSearchSubmit} className="w-full sm:w-auto">
           <div className="relative">
             <input
               type="text"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearch}
               placeholder="搜索文章..."
               className="w-full sm:w-64 p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
             />
@@ -229,53 +244,65 @@ const RssViewer = () => {
         </div>
       )}
       
-      {!loading && entries.length === 0 && (
-        <div className="text-center p-4 text-gray-600">未找到文章。</div>
+      {!loading && noResults && (
+        <div className="text-center p-4 text-gray-600">
+          <p className="mb-4">未找到符合條件的文章。</p>
+          {(searchTerm || selectedKeyword) && (
+            <button
+              onClick={clearSearch}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+            >
+              清除搜索條件
+            </button>
+          )}
+        </div>
       )}
 
-      <div className="space-y-4">
-        {entries.map((entry) => (
-          <div key={entry.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-            <div className="p-4">
-              <h2 className="text-base md:text-lg font-semibold mb-2 text-pink-600">
-                {entry.title}
-              </h2>
-              <h3 className="text-sm md:text-md mb-2 text-gray-800 font-bold">
-                {entry.title_translated}
-              </h3>
-              <p className="text-sm text-gray-600 mb-4">
-                {entry.tldr}
-              </p>
-              {Array.isArray(entry.keywords) && entry.keywords.length > 0 && (
-                <div className="mb-4">
-                  {entry.keywords.map((keyword, index) => (
-                    <span
-                      key={index}
-                      onClick={() => handleKeywordClick(keyword)}
-                      className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2 mb-2 cursor-pointer hover:bg-blue-200"
-                    >
-                      {keyword}
-                    </span>
-                  ))}
+      {!loading && !noResults && (
+        <div className="space-y-4">
+          {entries.map((entry) => (
+            <div key={entry.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+              <div className="p-4">
+                <h2 className="text-base md:text-lg font-semibold mb-2 text-pink-600">
+                  {entry.title}
+                </h2>
+                <h3 className="text-sm md:text-md mb-2 text-gray-800 font-bold">
+                  {entry.title_translated}
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  {entry.tldr}
+                </p>
+                {Array.isArray(entry.keywords) && entry.keywords.length > 0 && (
+                  <div className="mb-4">
+                    {entry.keywords.map((keyword, index) => (
+                      <span
+                        key={index}
+                        onClick={() => handleKeywordClick(keyword)}
+                        className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2 mb-2 cursor-pointer hover:bg-blue-200"
+                      >
+                        {keyword}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <div className="text-xs text-gray-500 flex items-center flex-wrap">
+                  <a href={`https://pubmed.ncbi.nlm.nih.gov/${entry.pmid}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                    PubMed
+                  </a>
+                  <span className="mx-1">•</span>
+                  <span className="text-green-600">
+                    {entry.source}
+                  </span>
+                  <span className="mx-1">•</span>
+                  <span className="text-amber-500">
+                    發布日期: {new Date(entry.published).toLocaleDateString('zh-TW')}
+                  </span>
                 </div>
-              )}
-              <div className="text-xs text-gray-500 flex items-center flex-wrap">
-                <a href={`https://pubmed.ncbi.nlm.nih.gov/${entry.pmid}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                  PubMed
-                </a>
-                <span className="mx-1">•</span>
-                <span className="text-green-600">
-                  {entry.source}
-                </span>
-                <span className="mx-1">•</span>
-                <span className="text-amber-500">
-                  發布日期: {new Date(entry.published).toLocaleDateString('zh-TW')}
-                </span>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {selectedKeyword && (
         <div className="mt-4 flex items-center justify-center">
@@ -283,7 +310,7 @@ const RssViewer = () => {
             搜索關鍵字: {selectedKeyword}
           </span>
           <button
-            onClick={clearKeywordSearch}
+            onClick={clearSearch}
             className="text-gray-500 hover:text-gray-700"
           >
             <X className="w-4 h-4" />
