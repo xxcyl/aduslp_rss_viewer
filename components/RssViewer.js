@@ -57,7 +57,7 @@ const RssViewer = () => {
         .select('*', { count: 'exact' });
 
       if (searchTerm) {
-        query = query.or(`title.ilike.%${searchTerm}%,title_translated.ilike.%${searchTerm}%,tldr.ilike.%${searchTerm}%`);
+        query = query.or(`title.ilike.%${searchTerm}%,title_translated.ilike.%${searchTerm}%,tldr.ilike.%${searchTerm}%,keywords.ilike.%${searchTerm}%`);
       }
       
       if (selectedSource) {
