@@ -52,6 +52,7 @@ const RssViewer = () => {
   const fetchEntries = async () => {
     try {
       setLoading(true);
+      setError(null);
 
       let query = supabase
         .from('rss_entries')
@@ -77,13 +78,17 @@ const RssViewer = () => {
       }
 
       if (selectedKeyword) {
-        query = query.contains('keywords', [selectedKeyword]);
+        query = query.filter('keywords', 'cs', `["${selectedKeyword}"]`);
       }
+
+      console.log('Query:', query.toSQL()); // 輸出 SQL 查詢以進行調試
 
       const { data, count, error } = await query
         .order('published', { ascending: sortOrder === 'asc' });
 
       if (error) throw error;
+
+      console.log('Fetched data:', data); // 輸出獲取的數據以進行調試
 
       setEntries(data);
       const filteredSources = [...new Set(data.map(entry => entry.source))];
@@ -119,7 +124,7 @@ const RssViewer = () => {
   };
 
   const handleKeywordClick = (keyword) => {
-    setSelectedKeyword(keyword === selectedKeyword ? '' : keyword);
+    setSelectedKeyword(prevKeyword => prevKeyword === keyword ? '' : keyword);
     setCurrentPage(1);
   };
 
