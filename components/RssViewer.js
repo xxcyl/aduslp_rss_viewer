@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Search, SortAsc, SortDesc, X } from 'lucide-react';
+import { Search, SortAsc, SortDesc } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -21,7 +21,6 @@ const RssViewer = () => {
   const [filteredSources, setFilteredSources] = useState([]);
   const [selectedSource, setSelectedSource] = useState('');
   const [dateRange, setDateRange] = useState('');
-  const [selectedKeywords, setSelectedKeywords] = useState([]);
 
   useEffect(() => {
     fetchStats();
@@ -29,25 +28,25 @@ const RssViewer = () => {
 
   useEffect(() => {
     fetchEntries();
-  }, [currentPage, searchTerm, sortOrder, selectedSource, dateRange, selectedKeywords]);
+  }, [currentPage, searchTerm, sortOrder, selectedSource, dateRange]);
 
   const fetchStats = async () => {
-    try {
-      const { data: sources, error: sourcesError } = await supabase
-        .from('rss_entries')
-        .select('source');
+  try {
+    const { data: sources, error: sourcesError } = await supabase
+      .from('rss_entries')
+      .select('source');
 
-      if (sourcesError) throw sourcesError;
+    if (sourcesError) throw sourcesError;
 
-      const uniqueSources = [...new Set(sources.map(s => s.source))].sort((a, b) => a.localeCompare(b));
-      setUniqueSources(uniqueSources);
-      setFilteredSources(uniqueSources);
-      setTotalEntries(sources.length);
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-      setError(`獲取統計資料失敗: ${error.message}`);
-    }
-  };
+    const uniqueSources = [...new Set(sources.map(s => s.source))].sort((a, b) => a.localeCompare(b));
+    setUniqueSources(uniqueSources);
+    setFilteredSources(uniqueSources);
+    setTotalEntries(sources.length);
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    setError(`獲取統計資料失敗: ${error.message}`);
+  }
+};
 
   const fetchEntries = async () => {
     try {
@@ -76,10 +75,6 @@ const RssViewer = () => {
         query = query.gte('published', startDate.toISOString());
       }
 
-      if (selectedKeywords.length > 0) {
-        query = query.contains('keywords', selectedKeywords);
-      }
-
       const { data, count, error } = await query
         .order('published', { ascending: sortOrder === 'asc' });
 
@@ -90,6 +85,7 @@ const RssViewer = () => {
       setTotalEntries(count || 0);
       setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
 
+      // 只獲取當前頁面的條目
       const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
       setEntries(data.slice(startIndex, startIndex + ITEMS_PER_PAGE));
     } catch (error) {
@@ -117,20 +113,6 @@ const RssViewer = () => {
 
   const handleDateRangeChange = (range) => {
     setDateRange(range === dateRange ? '' : range);
-    setCurrentPage(1);
-  };
-
-  const handleKeywordClick = (keyword) => {
-    if (selectedKeywords.includes(keyword)) {
-      setSelectedKeywords(selectedKeywords.filter(k => k !== keyword));
-    } else {
-      setSelectedKeywords([...selectedKeywords, keyword]);
-    }
-    setCurrentPage(1);
-  };
-
-  const removeKeyword = (keyword) => {
-    setSelectedKeywords(selectedKeywords.filter(k => k !== keyword));
     setCurrentPage(1);
   };
 
@@ -205,19 +187,6 @@ const RssViewer = () => {
             最近一月
           </button>
         </div>
-
-        {selectedKeywords.length > 0 && (
-          <div className="flex flex-wrap gap-2">
-            {selectedKeywords.map(keyword => (
-              <span key={keyword} className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded flex items-center">
-                {keyword}
-                <button onClick={() => removeKeyword(keyword)} className="ml-1 text-blue-600 hover:text-blue-800">
-                  <X className="w-3 h-3" />
-                </button>
-              </span>
-            ))}
-          </div>
-        )}
       </div>
 
       {error && (
@@ -249,21 +218,6 @@ const RssViewer = () => {
               <p className="text-sm text-gray-600 mb-4">
                 {entry.tldr}
               </p>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {entry.keywords && entry.keywords.map(keyword => (
-                  <button
-                    key={keyword}
-                    onClick={() => handleKeywordClick(keyword)}
-                    className={`text-xs px-2 py-1 rounded ${
-                      selectedKeywords.includes(keyword)
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    {keyword}
-                  </button>
-                ))}
-              </div>
               <div className="text-xs text-gray-500 flex items-center flex-wrap">
                 <a href={`https://pubmed.ncbi.nlm.nih.gov/${entry.pmid}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                   PubMed
