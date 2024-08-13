@@ -77,8 +77,10 @@ const RssViewer = () => {
       }
 
       if (selectedKeyword) {
-        query = query.contains('keywords', [selectedKeyword]);
+        query = query.filter('keywords', 'cs', `{"${selectedKeyword}"}`);
       }
+
+      console.log('Query:', query.toSQL()); // 用於調試
 
       const { data, count, error } = await query
         .order('published', { ascending: sortOrder === 'asc' });
@@ -236,7 +238,7 @@ const RssViewer = () => {
               <p className="text-sm text-gray-600 mb-4">
                 {entry.tldr}
               </p>
-              {entry.keywords && entry.keywords.length > 0 && (
+              {Array.isArray(entry.keywords) && entry.keywords.length > 0 && (
                 <div className="mb-4">
                   {entry.keywords.map((keyword, index) => (
                     <span
