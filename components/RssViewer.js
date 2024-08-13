@@ -77,15 +77,23 @@ const RssViewer = () => {
       }
 
       if (selectedKeyword) {
-        query = query.filter('keywords', 'cs', `{"${selectedKeyword}"}`);
+        query = query.contains('keywords', [selectedKeyword]);
       }
 
-      console.log('Query:', query.toSQL()); // 用於調試
+      console.log('Query parameters:', {
+        searchTerm,
+        selectedSource,
+        dateRange,
+        selectedKeyword,
+        sortOrder
+      });
 
       const { data, count, error } = await query
         .order('published', { ascending: sortOrder === 'asc' });
 
       if (error) throw error;
+
+      console.log('Fetched data:', data);
 
       const filteredSources = [...new Set(data.map(entry => entry.source))];
       setFilteredSources(filteredSources);
