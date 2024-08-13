@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Search, SortAsc, SortDesc, X } from 'lucide-react';
+import { Search, SortAsc, SortDesc } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -21,7 +21,6 @@ const RssViewer = () => {
   const [filteredSources, setFilteredSources] = useState([]);
   const [selectedSource, setSelectedSource] = useState('');
   const [dateRange, setDateRange] = useState('');
-  const [selectedKeyword, setSelectedKeyword] = useState('');
 
   useEffect(() => {
     fetchStats();
@@ -29,7 +28,7 @@ const RssViewer = () => {
 
   useEffect(() => {
     fetchEntries();
-  }, [currentPage, searchTerm, sortOrder, selectedSource, dateRange, selectedKeyword]);
+  }, [currentPage, searchTerm, sortOrder, selectedSource, dateRange]);
 
   const fetchStats = async () => {
     try {
@@ -52,7 +51,6 @@ const RssViewer = () => {
   const fetchEntries = async () => {
     try {
       setLoading(true);
-      setError(null);
 
       let query = supabase
         .from('rss_entries')
@@ -77,24 +75,18 @@ const RssViewer = () => {
         query = query.gte('published', startDate.toISOString());
       }
 
-      if (selectedKeyword) {
-        query = query.filter('keywords', 'cs', `["${selectedKeyword}"]`);
-      }
-
-      console.log('Query:', query.toSQL()); // 輸出 SQL 查詢以進行調試
-
       const { data, count, error } = await query
         .order('published', { ascending: sortOrder === 'asc' });
 
       if (error) throw error;
 
-      console.log('Fetched data:', data); // 輸出獲取的數據以進行調試
-
-      setEntries(data);
       const filteredSources = [...new Set(data.map(entry => entry.source))];
       setFilteredSources(filteredSources);
       setTotalEntries(count || 0);
       setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
+
+      const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+      setEntries(data.slice(startIndex, startIndex + ITEMS_PER_PAGE));
     } catch (error) {
       console.error('Error fetching entries:', error);
       setError(`獲取文章失敗: ${error.message}`);
@@ -120,11 +112,6 @@ const RssViewer = () => {
 
   const handleDateRangeChange = (range) => {
     setDateRange(range === dateRange ? '' : range);
-    setCurrentPage(1);
-  };
-
-  const handleKeywordClick = (keyword) => {
-    setSelectedKeyword(prevKeyword => prevKeyword === keyword ? '' : keyword);
     setCurrentPage(1);
   };
 
@@ -203,21 +190,6 @@ const RssViewer = () => {
         </div>
       </div>
 
-      {selectedKeyword && (
-        <div className="mb-4 flex items-center bg-blue-100 p-2 rounded">
-          <span className="mr-2">已選擇的關鍵字：</span>
-          <span className="bg-blue-500 text-white px-2 py-1 rounded text-sm flex items-center">
-            {selectedKeyword}
-            <button
-              onClick={() => setSelectedKeyword('')}
-              className="ml-2 focus:outline-none"
-            >
-              <X size={16} />
-            </button>
-          </span>
-        </div>
-      )}
-
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           錯誤: {error}
@@ -247,23 +219,6 @@ const RssViewer = () => {
               <p className="text-sm text-gray-600 mb-4">
                 {entry.tldr}
               </p>
-              {Array.isArray(entry.keywords) && entry.keywords.length > 0 && (
-                <div className="mb-2 flex flex-wrap">
-                  {entry.keywords.map((keyword, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleKeywordClick(keyword)}
-                      className={`mr-2 mb-2 px-2 py-1 text-xs rounded-full ${
-                        selectedKeyword === keyword
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    >
-                      {keyword}
-                    </button>
-                  ))}
-                </div>
-              )}
               <div className="text-xs text-gray-500 flex items-center flex-wrap">
                 <a href={`https://pubmed.ncbi.nlm.nih.gov/${entry.pmid}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                   PubMed
