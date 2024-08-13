@@ -65,7 +65,7 @@ const RssViewer = () => {
       }
 
       if (selectedKeyword) {
-        query = query.contains('keywords', [selectedKeyword]);
+        query = query.filter('keywords', 'cs', `%${selectedKeyword}%`);
       }
 
       if (selectedSource) {
