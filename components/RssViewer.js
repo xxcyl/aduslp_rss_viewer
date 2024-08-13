@@ -31,22 +31,22 @@ const RssViewer = () => {
   }, [currentPage, searchTerm, sortOrder, selectedSource, dateRange]);
 
   const fetchStats = async () => {
-  try {
-    const { data: sources, error: sourcesError } = await supabase
-      .from('rss_entries')
-      .select('source');
+    try {
+      const { data: sources, error: sourcesError } = await supabase
+        .from('rss_entries')
+        .select('source');
 
-    if (sourcesError) throw sourcesError;
+      if (sourcesError) throw sourcesError;
 
-    const uniqueSources = [...new Set(sources.map(s => s.source))].sort((a, b) => a.localeCompare(b));
-    setUniqueSources(uniqueSources);
-    setFilteredSources(uniqueSources);
-    setTotalEntries(sources.length);
-  } catch (error) {
-    console.error('Error fetching stats:', error);
-    setError(`獲取統計資料失敗: ${error.message}`);
-  }
-};
+      const uniqueSources = [...new Set(sources.map(s => s.source))].sort((a, b) => a.localeCompare(b));
+      setUniqueSources(uniqueSources);
+      setFilteredSources(uniqueSources);
+      setTotalEntries(sources.length);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      setError(`獲取統計資料失敗: ${error.message}`);
+    }
+  };
 
   const fetchEntries = async () => {
     try {
@@ -85,7 +85,6 @@ const RssViewer = () => {
       setTotalEntries(count || 0);
       setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
 
-      // 只獲取當前頁面的條目
       const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
       setEntries(data.slice(startIndex, startIndex + ITEMS_PER_PAGE));
     } catch (error) {
@@ -118,9 +117,26 @@ const RssViewer = () => {
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-8 bg-gray-100">
-      <h1 className="text-2xl md:text-3xl font-bold mb-8 text-center text-gray-800">
-        📚 聽語期刊速報
-      </h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">
+          📚 聽語期刊速報
+        </h1>
+        
+        <form onSubmit={handleSearch} className="w-full sm:w-auto">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="搜索文章..."
+              className="w-full sm:w-64 p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
+            />
+            <button type="submit" className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-lg text-xs px-2 py-1 hover:bg-blue-700 focus:ring-2 focus:outline-none focus:ring-blue-300">
+              <Search className="w-4 h-4" />
+            </button>
+          </div>
+        </form>
+      </div>
       
       <div className="mb-4 text-center">
         <p className="text-sm md:text-base text-gray-600">
@@ -129,21 +145,6 @@ const RssViewer = () => {
       </div>
 
       <div className="flex flex-col space-y-4 mb-6">
-        <form onSubmit={handleSearch} className="w-full">
-          <div className="relative">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="搜索文章..."
-              className="w-full p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
-            />
-            <button type="submit" className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-lg text-xs px-2 py-1 hover:bg-blue-700 focus:ring-2 focus:outline-none focus:ring-blue-300">
-              <Search className="w-4 h-4" />
-            </button>
-          </div>
-        </form>
-
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <select
             value={selectedSource}
