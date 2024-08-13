@@ -256,7 +256,7 @@ const RssViewer = () => {
 
       <div className="mt-12 p-4 border-t border-gray-300 text-gray-600">
         <p className="text-sm md:text-base">
-          <strong>⚠️ 警告：</strong>請注意，AI 處理生成的 TL;DR 摘要和中文翻譯可能存在錯誤或不準確之處。為確保資訊的準確性，我們強烈建議您參考原文內容。這些 AI 生成的內容僅供快速瀏覽參考，不應替代對原始研究論文的仔細閱讀和理解。
+          <strong>⚠️ 警告：</strong>AI 處理生成的 TL;DR 摘要和中文翻譯可能存在錯誤或不準確之處。為確保資訊的準確性，我們強烈建議您參考原文內容。
         </p>
       </div>
     </div>
