@@ -61,9 +61,10 @@ const RssViewer = () => {
           `title.ilike.%${searchTerm}%,` +
           `title_translated.ilike.%${searchTerm}%,` +
           `tldr.ilike.%${searchTerm}%,` +
-          `keywords::jsonb @> '["${searchTerm}"]'::jsonb`
+          `keywords::text ilike '%${searchTerm}%'`
         );
       }
+      
       if (selectedSource) {
         query = query.eq('source', selectedSource);
       }
