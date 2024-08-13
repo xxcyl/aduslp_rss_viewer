@@ -117,7 +117,7 @@ const RssViewer = () => {
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-8 bg-gray-100">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">
           📚 聽語期刊速報
         </h1>
@@ -138,13 +138,36 @@ const RssViewer = () => {
         </form>
       </div>
       
-      <div className="mb-4 text-center">
-        <p className="text-sm md:text-base text-gray-600">
-          共有 {filteredSources.length} 個期刊，共 {totalEntries} 篇文章
-        </p>
-      </div>
-
-      <div className="flex flex-col space-y-4 mb-6">
+      <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div className="flex flex-wrap justify-between items-center mb-4">
+          <p className="text-sm text-gray-600 mb-2 sm:mb-0">
+            共有 <span className="font-semibold text-blue-600">{filteredSources.length}</span> 個期刊，
+            共 <span className="font-semibold text-blue-600">{totalEntries}</span> 篇文章
+          </p>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => handleDateRangeChange('week')}
+              className={`px-3 py-1 text-xs rounded-full focus:outline-none ${
+                dateRange === 'week'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              最近一周
+            </button>
+            <button
+              onClick={() => handleDateRangeChange('month')}
+              className={`px-3 py-1 text-xs rounded-full focus:outline-none ${
+                dateRange === 'month'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+            >
+              最近一月
+            </button>
+          </div>
+        </div>
+        
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <select
             value={selectedSource}
@@ -162,30 +185,7 @@ const RssViewer = () => {
             className="w-full sm:w-auto p-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 focus:ring-2 focus:outline-none focus:ring-blue-300 flex items-center justify-center"
           >
             {sortOrder === 'asc' ? <SortAsc className="w-4 h-4 mr-1" /> : <SortDesc className="w-4 h-4 mr-1" />}
-            {sortOrder === 'asc' ? '升序' : '降序'}
-          </button>
-        </div>
-
-        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-          <button
-            onClick={() => handleDateRangeChange('week')}
-            className={`w-full sm:w-auto p-2 text-sm rounded-lg focus:ring-2 focus:outline-none ${
-              dateRange === 'week'
-                ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-400'
-            }`}
-          >
-            最近一周
-          </button>
-          <button
-            onClick={() => handleDateRangeChange('month')}
-            className={`w-full sm:w-auto p-2 text-sm rounded-lg focus:ring-2 focus:outline-none ${
-              dateRange === 'month'
-                ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-300'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-400'
-            }`}
-          >
-            最近一月
+            {sortOrder === 'asc' ? '時間升序' : '時間降序'}
           </button>
         </div>
       </div>
