@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Search, SortAsc, SortDesc } from 'lucide-react';
+import { Search, SortAsc, SortDesc, X } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -21,6 +21,7 @@ const RssViewer = () => {
   const [filteredSources, setFilteredSources] = useState([]);
   const [selectedSource, setSelectedSource] = useState('');
   const [dateRange, setDateRange] = useState('');
+  const [selectedKeyword, setSelectedKeyword] = useState('');
 
   useEffect(() => {
     fetchStats();
@@ -28,7 +29,7 @@ const RssViewer = () => {
 
   useEffect(() => {
     fetchEntries();
-  }, [currentPage, searchTerm, sortOrder, selectedSource, dateRange]);
+  }, [currentPage, searchTerm, sortOrder, selectedSource, dateRange, selectedKeyword]);
 
   const fetchStats = async () => {
     try {
@@ -75,6 +76,10 @@ const RssViewer = () => {
         query = query.gte('published', startDate.toISOString());
       }
 
+      if (selectedKeyword) {
+        query = query.contains('keywords', [selectedKeyword]);
+      }
+
       const { data, count, error } = await query
         .order('published', { ascending: sortOrder === 'asc' });
 
@@ -98,6 +103,7 @@ const RssViewer = () => {
   const handleSearch = (e) => {
     e.preventDefault();
     setCurrentPage(1);
+    setSelectedKeyword('');
     fetchEntries();
   };
 
@@ -112,6 +118,17 @@ const RssViewer = () => {
 
   const handleDateRangeChange = (range) => {
     setDateRange(range === dateRange ? '' : range);
+    setCurrentPage(1);
+  };
+
+  const handleKeywordClick = (keyword) => {
+    setSelectedKeyword(keyword);
+    setSearchTerm('');
+    setCurrentPage(1);
+  };
+
+  const clearKeywordSearch = () => {
+    setSelectedKeyword('');
     setCurrentPage(1);
   };
 
@@ -219,6 +236,19 @@ const RssViewer = () => {
               <p className="text-sm text-gray-600 mb-4">
                 {entry.tldr}
               </p>
+              {entry.keywords && entry.keywords.length > 0 && (
+                <div className="mb-4">
+                  {entry.keywords.map((keyword, index) => (
+                    <span
+                      key={index}
+                      onClick={() => handleKeywordClick(keyword)}
+                      className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full mr-2 mb-2 cursor-pointer hover:bg-blue-200"
+                    >
+                      {keyword}
+                    </span>
+                  ))}
+                </div>
+              )}
               <div className="text-xs text-gray-500 flex items-center flex-wrap">
                 <a href={`https://pubmed.ncbi.nlm.nih.gov/${entry.pmid}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                   PubMed
@@ -236,6 +266,20 @@ const RssViewer = () => {
           </div>
         ))}
       </div>
+
+      {selectedKeyword && (
+        <div className="mt-4 flex items-center justify-center">
+          <span className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full mr-2">
+            搜索關鍵字: {selectedKeyword}
+          </span>
+          <button
+            onClick={clearKeywordSearch}
+            className="text-gray-500 hover:text-gray-700"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
 
       {totalPages > 1 && (
         <div className="flex flex-wrap justify-center mt-8">
