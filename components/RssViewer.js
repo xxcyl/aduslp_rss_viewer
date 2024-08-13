@@ -31,16 +31,6 @@ const RssViewer = () => {
     fetchEntries();
   }, [currentPage, searchTerm, sortOrder, selectedSource, dateRange, selectedKeyword]);
 
-  const parseKeywords = (keywordsString) => {
-    try {
-      const parsed = JSON.parse(keywordsString);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-      console.error('Error parsing keywords:', error);
-      return [];
-    }
-  };
-
   const fetchStats = async () => {
     try {
       const { data: sources, error: sourcesError } = await supabase
@@ -87,7 +77,7 @@ const RssViewer = () => {
       }
 
       if (selectedKeyword) {
-        query = query.filter('keywords', 'cs', `%${selectedKeyword}%`);
+        query = query.contains('keywords', [selectedKeyword]);
       }
 
       const { data, count, error } = await query
@@ -95,18 +85,11 @@ const RssViewer = () => {
 
       if (error) throw error;
 
-      const processedData = data.map(entry => ({
-        ...entry,
-        keywords: parseKeywords(entry.keywords)
-      }));
-
-      const filteredSources = [...new Set(processedData.map(entry => entry.source))];
+      setEntries(data);
+      const filteredSources = [...new Set(data.map(entry => entry.source))];
       setFilteredSources(filteredSources);
       setTotalEntries(count || 0);
       setTotalPages(Math.ceil((count || 0) / ITEMS_PER_PAGE));
-
-      const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-      setEntries(processedData.slice(startIndex, startIndex + ITEMS_PER_PAGE));
     } catch (error) {
       console.error('Error fetching entries:', error);
       setError(`獲取文章失敗: ${error.message}`);
@@ -259,7 +242,7 @@ const RssViewer = () => {
               <p className="text-sm text-gray-600 mb-4">
                 {entry.tldr}
               </p>
-              {entry.keywords.length > 0 && (
+              {Array.isArray(entry.keywords) && entry.keywords.length > 0 && (
                 <div className="mb-2 flex flex-wrap">
                   {entry.keywords.map((keyword, index) => (
                     <button
