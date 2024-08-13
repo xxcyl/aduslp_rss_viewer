@@ -31,22 +31,22 @@ const RssViewer = () => {
   }, [currentPage, searchTerm, sortOrder, selectedSource, dateRange]);
 
   const fetchStats = async () => {
-    try {
-      const { data: sources, error: sourcesError } = await supabase
-        .from('rss_entries')
-        .select('source');
+  try {
+    const { data: sources, error: sourcesError } = await supabase
+      .from('rss_entries')
+      .select('source');
 
-      if (sourcesError) throw sourcesError;
+    if (sourcesError) throw sourcesError;
 
-      const uniqueSources = [...new Set(sources.map(s => s.source))];
-      setUniqueSources(uniqueSources);
-      setFilteredSources(uniqueSources);
-      setTotalEntries(sources.length);
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-      setError(`獲取統計資料失敗: ${error.message}`);
-    }
-  };
+    const uniqueSources = [...new Set(sources.map(s => s.source))].sort((a, b) => a.localeCompare(b));
+    setUniqueSources(uniqueSources);
+    setFilteredSources(uniqueSources);
+    setTotalEntries(sources.length);
+  } catch (error) {
+    console.error('Error fetching stats:', error);
+    setError(`獲取統計資料失敗: ${error.message}`);
+  }
+};
 
   const fetchEntries = async () => {
     try {
