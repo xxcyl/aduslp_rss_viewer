@@ -316,10 +316,20 @@ const RssViewer = () => {
       )}
 
       <div className="mt-12 p-4 border-t border-gray-300 text-gray-600 text-center">
-        <p className="text-sm md:text-base max-w-3xl mx-auto">
+        <p className="text-sm md:text-base mx-auto max-w-4xl">
           <strong>⚠️ 警告：</strong>AI 處理生成的 TL;DR 摘要和中文翻譯可能存在錯誤或不準確之處。為確保資訊的準確性，我們強烈建議您參考原文內容。
         </p>
       </div>
+    </div>
+
+    <footer className="mt-8 text-center text-gray-600">
+        <p className="flex items-center justify-center">
+          <span className="mr-2">By CHEYU LEE</span>
+          <a href="mailto:wittyxx@gmail.com" className="text-blue-600 hover:text-blue-800">
+            <Mail className="w-5 h-5" />
+          </a>
+        </p>
+      </footer>
     </div>
   );
 };
