@@ -167,6 +167,7 @@ const RssViewer = () => {
           <a href="https://audslp.vercel.app/" className="hover:text-blue-600 transition-colors duration-300">
             📚 聽語期刊速報
           </a>
+        </h1>
         
         <form onSubmit={handleSearch} className="w-full sm:w-auto relative">
           <div className="relative">
