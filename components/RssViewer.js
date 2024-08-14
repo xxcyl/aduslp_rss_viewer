@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Search, SortAsc, SortDesc, Tag } from 'lucide-react';
+import { Search, SortAsc, SortDesc, Tag, X, ExternalLink } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -28,8 +28,10 @@ const RssViewer = () => {
   }, []);
 
   useEffect(() => {
-    fetchEntries();
-  }, [currentPage, sortOrder, selectedSource, dateRange, activeKeyword]);
+    if (!activeKeyword) {
+      fetchEntries();
+    }
+  }, [currentPage, sortOrder, selectedSource, dateRange]);
 
   const fetchStats = async () => {
     try {
@@ -49,7 +51,7 @@ const RssViewer = () => {
     }
   };
 
-  const fetchEntries = async () => {
+  const fetchEntries = async (term = searchTerm) => {
     try {
       setLoading(true);
 
@@ -57,8 +59,7 @@ const RssViewer = () => {
         .from('rss_entries')
         .select('*', { count: 'exact' });
 
-      if (searchTerm || activeKeyword) {
-        const term = searchTerm || activeKeyword;
+      if (term) {
         query = query.or(`title.ilike.%${term}%,title_translated.ilike.%${term}%,tldr.ilike.%${term}%,keywords.ilike.%${term}%`);
       }
 
@@ -101,7 +102,7 @@ const RssViewer = () => {
     e.preventDefault();
     setCurrentPage(1);
     setActiveKeyword('');
-    fetchEntries();
+    fetchEntries(searchTerm);
   };
 
   const toggleSortOrder = () => {
@@ -119,14 +120,17 @@ const RssViewer = () => {
   };
 
   const handleKeywordClick = (keyword) => {
-    if (activeKeyword === keyword) {
-      setActiveKeyword('');
-      setSearchTerm('');
-    } else {
-      setActiveKeyword(keyword);
-      setSearchTerm('');
-    }
+    setSearchTerm(keyword);
+    setActiveKeyword(keyword);
     setCurrentPage(1);
+    fetchEntries(keyword);
+  };
+
+  const clearKeywordSearch = () => {
+    setSearchTerm('');
+    setActiveKeyword('');
+    setCurrentPage(1);
+    fetchEntries('');
   };
 
   const renderKeywords = (keywordsString) => {
@@ -166,12 +170,10 @@ const RssViewer = () => {
     <div className="container mx-auto px-2 sm:px-4 py-8 bg-gray-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">
-          <a href="https://audslp.vercel.app/" className="hover:text-blue-600 transition-colors duration-300">
-            📚 聽語期刊速報
-          </a>
+          📚 聽語期刊速報
         </h1>
         
-        <form onSubmit={handleSearch} className="w-full sm:w-auto">
+        <form onSubmit={handleSearch} className="w-full sm:w-auto relative">
           <div className="relative">
             <input
               type="text"
@@ -184,6 +186,19 @@ const RssViewer = () => {
               <Search className="w-4 h-4" />
             </button>
           </div>
+          {activeKeyword && (
+            <div className="absolute left-0 -bottom-8 flex items-center bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">
+              <span className="mr-1">當前關鍵字:</span>
+              <span className="font-bold">{activeKeyword}</span>
+              <button
+                onClick={clearKeywordSearch}
+                className="ml-1 text-blue-600 hover:text-blue-800"
+                aria-label="清除關鍵字搜索"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          )}
         </form>
       </div>
       
@@ -259,8 +274,22 @@ const RssViewer = () => {
         {entries.map((entry) => (
           <div key={entry.id} className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="p-4">
-              <h2 className="text-base md:text-lg font-semibold mb-2 text-pink-600">
-                {entry.title}
+              <h2 className="text-base md:text-lg font-semibold mb-2 text-pink-600 flex items-center">
+                {entry.doi ? (
+                  <>
+                    <a
+                      href={`https://doi.org/${entry.doi}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:underline mr-1"
+                    >
+                      {entry.title}
+                    </a>
+                    <ExternalLink className="w-4 h-4" />
+                  </>
+                ) : (
+                  entry.title
+                )}
               </h2>
               <h3 className="text-sm md:text-md mb-2 text-gray-800 font-bold">
                 {entry.title_translated}
