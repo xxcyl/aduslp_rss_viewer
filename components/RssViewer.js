@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Search, SortAsc, SortDesc, Tag, ExternalLink, HelpCircle } from 'lucide-react';
-import UserGuideContent from './UserGuideContent';
+import { Search, SortAsc, SortDesc, Tag, ExternalLink } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -23,7 +22,6 @@ const RssViewer = () => {
   const [selectedSource, setSelectedSource] = useState('');
   const [dateRange, setDateRange] = useState('');
   const [activeKeyword, setActiveKeyword] = useState('');
-  const [showUserGuide, setShowUserGuide] = useState(false);
 
   useEffect(() => {
     fetchStats();
@@ -169,47 +167,21 @@ const RssViewer = () => {
           📚 聽語期刊速報
         </h1>
         
-        <div className="flex items-center space-x-2">
-          <form onSubmit={handleSearch} className="w-full sm:w-auto relative">
-            <div className="relative">
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="搜索文章或關鍵字..."
-                className="w-full sm:w-64 p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
-              />
-              <button type="submit" className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-lg text-xs px-2 py-1 hover:bg-blue-700 focus:ring-2 focus:outline-none focus:ring-blue-300">
-                <Search className="w-4 h-4" />
-              </button>
-            </div>
-          </form>
-          
-          <button
-            onClick={() => setShowUserGuide(!showUserGuide)}
-            className="p-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
-          >
-            <HelpCircle className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
-
-      {showUserGuide && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-4xl max-h-[80vh] overflow-y-auto">
-            <h2 className="text-2xl font-bold mb-4">使用說明</h2>
-            <div className="prose max-w-none">
-              <UserGuideContent />
-            </div>
-            <button
-              onClick={() => setShowUserGuide(false)}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-            >
-              關閉
+        <form onSubmit={handleSearch} className="w-full sm:w-auto relative">
+          <div className="relative">
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="搜索文章或關鍵字..."
+              className="w-full sm:w-64 p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
+            />
+            <button type="submit" className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-lg text-xs px-2 py-1 hover:bg-blue-700 focus:ring-2 focus:outline-none focus:ring-blue-300">
+              <Search className="w-4 h-4" />
             </button>
           </div>
-        </div>
-      )}
+        </form>
+      </div>
       
       <div className="bg-white rounded-lg shadow-md p-4 mb-6">
         <div className="flex flex-wrap justify-between items-center mb-4">
