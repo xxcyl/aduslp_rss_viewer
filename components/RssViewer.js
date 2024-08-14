@@ -255,19 +255,17 @@ const RssViewer = () => {
         {entries.map((entry) => (
           <div key={entry.id} className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="p-4">
-              <h2 className="text-base md:text-lg font-semibold mb-2 text-pink-600 flex items-center">
+              <h2 className="text-base md:text-lg font-semibold mb-2 text-pink-600">
                 {entry.doi ? (
-                  <>
-                    <a
-                      href={`https://doi.org/${entry.doi}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:underline mr-1"
-                    >
-                      {entry.title}
-                    </a>
-                    <ExternalLink className="w-4 h-4" />
-                  </>
+                  <a
+                    href={`https://doi.org/${entry.doi}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline flex items-center"
+                  >
+                    <span className="mr-1">{entry.title}</span>
+                    <ExternalLink className="hidden sm:inline-block w-5 h-5 flex-shrink-0" />
+                  </a>
                 ) : (
                   entry.title
                 )}
