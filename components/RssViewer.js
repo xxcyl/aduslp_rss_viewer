@@ -255,7 +255,7 @@ const RssViewer = () => {
 
       <div className="space-y-4">
         {entries.map((entry) => (
-          <div key={entry.id} className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 ease-in-out hover:-translate-y-1 hover:shadow-lg">
+          <div key={entry.id} className="bg-white rounded-lg shadow-md overflow-hidden transform transition duration-300 ease-in-out hover:-translate-y-2 hover:scale-[1.02] hover:shadow-xl">
             <div className="p-4">
               <h2 className="text-base md:text-lg font-semibold mb-2 text-pink-600">
                 {entry.doi ? (
