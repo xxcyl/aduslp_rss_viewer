@@ -322,7 +322,7 @@ const RssViewer = () => {
       </div>
     </div>
 
-    <footer className="mt-8 text-center text-gray-600">
+      <footer className="mt-8 text-center text-gray-600">
         <p className="flex items-center justify-center">
           <span className="mr-2">By CHEYU LEE</span>
           <a href="mailto:wittyxx@gmail.com" className="text-blue-600 hover:text-blue-800">
