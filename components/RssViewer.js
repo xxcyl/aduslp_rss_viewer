@@ -166,7 +166,9 @@ const RssViewer = () => {
     <div className="container mx-auto px-2 sm:px-4 py-8 bg-gray-100">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-4 sm:mb-0">
-          📚 聽語期刊速報
+          <a href="https://audslp.vercel.app/" className="hover:text-blue-600 transition-colors duration-300">
+            📚 聽語期刊速報
+          </a>
         </h1>
         
         <form onSubmit={handleSearch} className="w-full sm:w-auto">
