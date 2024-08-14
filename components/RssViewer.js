@@ -320,7 +320,6 @@ const RssViewer = () => {
           <strong>⚠️ 警告：</strong>AI 處理生成的 TL;DR 摘要和中文翻譯可能存在錯誤或不準確之處。為確保資訊的準確性，我們強烈建議您參考原文內容。
         </p>
       </div>
-    </div>
 
       <footer className="mt-8 text-center text-gray-600">
         <p className="flex items-center justify-center">
