@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Search, SortAsc, SortDesc, Tag, X } from 'lucide-react';
+import { Search, SortAsc, SortDesc, Tag } from 'lucide-react';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -28,10 +28,8 @@ const RssViewer = () => {
   }, []);
 
   useEffect(() => {
-    if (!activeKeyword) {
-      fetchEntries();
-    }
-  }, [currentPage, sortOrder, selectedSource, dateRange]);
+    fetchEntries();
+  }, [currentPage, sortOrder, selectedSource, dateRange, activeKeyword]);
 
   const fetchStats = async () => {
     try {
@@ -51,7 +49,7 @@ const RssViewer = () => {
     }
   };
 
-  const fetchEntries = async (term = searchTerm) => {
+  const fetchEntries = async () => {
     try {
       setLoading(true);
 
@@ -59,7 +57,8 @@ const RssViewer = () => {
         .from('rss_entries')
         .select('*', { count: 'exact' });
 
-      if (term) {
+      if (searchTerm || activeKeyword) {
+        const term = searchTerm || activeKeyword;
         query = query.or(`title.ilike.%${term}%,title_translated.ilike.%${term}%,tldr.ilike.%${term}%,keywords.ilike.%${term}%`);
       }
 
@@ -102,7 +101,7 @@ const RssViewer = () => {
     e.preventDefault();
     setCurrentPage(1);
     setActiveKeyword('');
-    fetchEntries(searchTerm);
+    fetchEntries();
   };
 
   const toggleSortOrder = () => {
@@ -120,17 +119,14 @@ const RssViewer = () => {
   };
 
   const handleKeywordClick = (keyword) => {
-    setSearchTerm(keyword);
-    setActiveKeyword(keyword);
+    if (activeKeyword === keyword) {
+      setActiveKeyword('');
+      setSearchTerm('');
+    } else {
+      setActiveKeyword(keyword);
+      setSearchTerm('');
+    }
     setCurrentPage(1);
-    fetchEntries(keyword);
-  };
-
-  const clearKeywordSearch = () => {
-    setSearchTerm('');
-    setActiveKeyword('');
-    setCurrentPage(1);
-    fetchEntries('');
   };
 
   const renderKeywords = (keywordsString) => {
@@ -173,7 +169,7 @@ const RssViewer = () => {
           📚 聽語期刊速報
         </h1>
         
-        <form onSubmit={handleSearch} className="w-full sm:w-auto relative">
+        <form onSubmit={handleSearch} className="w-full sm:w-auto">
           <div className="relative">
             <input
               type="text"
@@ -186,19 +182,6 @@ const RssViewer = () => {
               <Search className="w-4 h-4" />
             </button>
           </div>
-          {activeKeyword && (
-            <div className="absolute left-0 -bottom-8 flex items-center bg-blue-100 text-blue-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded-full">
-              <span className="mr-1">當前關鍵字:</span>
-              <span className="font-bold">{activeKeyword}</span>
-              <button
-                onClick={clearKeywordSearch}
-                className="ml-1 text-blue-600 hover:text-blue-800"
-                aria-label="清除關鍵字搜索"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          )}
         </form>
       </div>
       
