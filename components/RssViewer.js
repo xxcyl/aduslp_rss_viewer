@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
-import { Search, SortAsc, SortDesc, Tag, ExternalLink } from 'lucide-react';
+import { Search, SortAsc, SortDesc, Tag, ExternalLink, HelpCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import UserGuideContent from './UserGuideContent';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -167,20 +170,41 @@ const RssViewer = () => {
           📚 聽語期刊速報
         </h1>
         
-        <form onSubmit={handleSearch} className="w-full sm:w-auto relative">
-          <div className="relative">
-            <input
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="搜索文章或關鍵字..."
-              className="w-full sm:w-64 p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
-            />
-            <button type="submit" className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-lg text-xs px-2 py-1 hover:bg-blue-700 focus:ring-2 focus:outline-none focus:ring-blue-300">
-              <Search className="w-4 h-4" />
-            </button>
-          </div>
-        </form>
+        <div className="flex items-center space-x-2">
+          <form onSubmit={handleSearch} className="w-full sm:w-auto relative">
+            <div className="relative">
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="搜索文章或關鍵字..."
+                className="w-full sm:w-64 p-2 pr-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-white focus:ring-blue-500 focus:border-blue-500"
+              />
+              <button type="submit" className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-lg text-xs px-2 py-1 hover:bg-blue-700 focus:ring-2 focus:outline-none focus:ring-blue-300">
+                <Search className="w-4 h-4" />
+              </button>
+            </div>
+          </form>
+          
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="icon">
+                <HelpCircle className="h-4 w-4" />
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>使用說明</DialogTitle>
+                <DialogDescription>
+                  了解如何使用聽語期刊速報來瀏覽最新研究。
+                </DialogDescription>
+              </DialogHeader>
+              <div className="prose max-w-none">
+                <UserGuideContent />
+              </div>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
       
       <div className="bg-white rounded-lg shadow-md p-4 mb-6">
