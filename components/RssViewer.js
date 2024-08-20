@@ -177,7 +177,7 @@ const RssViewer = () => {
   return (
     <div className={`container mx-auto px-2 sm:px-4 py-8 ${darkMode ? 'bg-gray-900 text-white' : 'bg-gray-100'} transition-colors duration-300`}>
       <div className="flex flex-col items-center sm:flex-row sm:justify-between sm:items-center mb-6">
-        <h1 className={`text-2xl md:text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-4 sm:mb-0 text-center sm:text-left`}>
+        <h1 className={`text-3xl sm:text-2xl md:text-3xl font-bold ${darkMode ? 'text-white' : 'text-gray-800'} mb-4 sm:mb-0 text-center sm:text-left`}>
           <a href="https://audslp.vercel.app/" className="hover:text-blue-600 transition-colors duration-300">
             📚 聽語期刊速報
           </a>
