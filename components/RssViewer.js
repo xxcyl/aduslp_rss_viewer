@@ -183,15 +183,15 @@ const RssViewer = () => {
           </a>
         </h1>
         
-        <div className="flex flex-col items-center sm:flex-row sm:items-center space-y-4 sm:space-y-0 sm:space-x-4">
-          <form onSubmit={handleSearch} className="w-full sm:w-auto relative">
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <form onSubmit={handleSearch} className="relative">
             <div className="relative">
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="搜索文章或關鍵字..."
-                className={`w-64 sm:w-auto p-2 pr-10 text-sm ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'} border ${darkMode ? 'border-gray-700' : 'border-gray-300'} rounded-lg focus:ring-blue-500 focus:border-blue-500`}
+                className={`w-48 sm:w-64 p-2 pr-10 text-sm ${darkMode ? 'bg-gray-800 text-white' : 'bg-white text-gray-900'} border ${darkMode ? 'border-gray-700' : 'border-gray-300'} rounded-lg focus:ring-blue-500 focus:border-blue-500`}
               />
               <button type="submit" className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-blue-600 text-white rounded-lg text-xs px-2 py-1 hover:bg-blue-700 focus:ring-2 focus:outline-none focus:ring-blue-300">
                 <Search className="w-4 h-4" />
@@ -200,7 +200,7 @@ const RssViewer = () => {
           </form>
           <button
             onClick={toggleDarkMode}
-            className={`p-2 rounded-full ${darkMode ? 'bg-yellow-400 text-gray-900' : 'bg-gray-800 text-white'}`}
+            className={`p-2 rounded-full ${darkMode ? 'bg-yellow-400 text-gray-900' : 'bg-gray-800 text-white'} flex-shrink-0`}
           >
             {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
