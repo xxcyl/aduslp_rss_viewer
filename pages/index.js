@@ -17,6 +17,7 @@ export default function Home() {
           href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📚</text></svg>"
         />
         <link rel="canonical" href={url} />
+        <meta name="google-site-verification" content="dWjVco60SzqTcHYWY1lR63gD9sydr5-heG3EH9nLrFY" />    
 
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
