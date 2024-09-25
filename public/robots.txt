@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# 禁止訪問 /api/ 路徑下的所有內容
+Disallow: /api/
+
+# 網站地圖位置
+Sitemap: https://audslp.vercel.app/sitemap.xml
