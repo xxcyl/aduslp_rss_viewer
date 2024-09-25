@@ -32,7 +32,7 @@ export default function Home() {
         <meta property="twitter:description" content={description} />
 
         {/* 其他有助於SEO的meta標籤 */}
-        <meta name="keywords" content="聽語, 期刊, 聽力學, 語言治療, 研究, RSS" />
+        <meta name="keywords" content="聽語, 聽語期刊, 聽語研究, 聽力期刊, 語言治療期刊, 聽力損失, 聽損, 吞嚥困難, 吞嚥障礙, 語言發展遲緩, 聽力學, 語言治療, 研究, RSS" />
         <meta name="robots" content="index, follow" />
 
         {/* 結構化數據 */}
