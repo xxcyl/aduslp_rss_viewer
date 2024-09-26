@@ -4,7 +4,7 @@ import RssViewer from '../components/RssViewer';
 export default function Home() {
   const title = "聽語期刊速報 | RSS 閱讀器";
   const description = "瀏覽最新的聽語相關期刊文章和研究，獲取聽力學和語言治療領域的最新資訊。";
-  const url = "https://audslp.vercel.app/"; // 請替換為您的實際網址
+  const url = "https://www.audslp.cc/"; // 請替換為您的實際網址
 
   return (
     <>
