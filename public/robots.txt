@@ -5,4 +5,4 @@ Allow: /
 Disallow: /api/
 
 # 網站地圖位置
-Sitemap: https://audslp.vercel.app/sitemap.xml
+Sitemap: https://www.audslp.cc/sitemap.xml
