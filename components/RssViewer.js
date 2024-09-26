@@ -38,7 +38,12 @@ const RssViewer = () => {
     localStorage.setItem('darkMode', darkMode);
     document.body.classList.toggle('dark', darkMode);
   }, [darkMode]);
-
+  
+  const setCurrentPageAndScrollToTop = (pageNumber) => {
+    setCurrentPage(pageNumber);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+  
   const fetchStats = async () => {
     try {
       const { data: sources, error: sourcesError } = await supabase
@@ -328,7 +333,7 @@ const RssViewer = () => {
           {[...Array(totalPages)].map((_, i) => (
             <button
               key={i}
-              onClick={() => setCurrentPage(i + 1)}
+              onClick={() => setCurrentPageAndScrollToTop(i + 1)}
               className={`m-1 px-3 py-1 text-sm rounded ${
                 currentPage === i + 1
                   ? 'bg-blue-600 text-white'
