@@ -6,6 +6,14 @@ export default function Home() {
   const description = "瀏覽最新的聽語相關期刊文章和研究，獲取聽力學和語言治療領域的最新資訊。";
   const url = "https://www.audslp.cc/"; // 請替換為您的實際網址
 
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "url": url,
+    "name": title,
+    "description": description
+  };
+
   return (
     <>
       <Head>
@@ -36,17 +44,9 @@ export default function Home() {
         <meta name="robots" content="index, follow" />
 
         {/* 結構化數據 */}
-        <script type="application/ld+json">
-          {`
-            {
-              "@context": "https://schema.org",
-              "@type": "WebSite",
-              "url": "${url}",
-              "name": "${title}",
-              "description": "${description}"
-            }
-          `}
-        </script>
+        <script type="application/ld+json" 
+                dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }} 
+        />
       </Head>
       <main>
         <h1 className="sr-only">聽語期刊速報 | 最新聽力學和語言治療研究</h1>
