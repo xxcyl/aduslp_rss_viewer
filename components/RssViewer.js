@@ -8,17 +8,17 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const ITEMS_PER_PAGE = 10;
 
-const RssViewer = () => {
-  const [entries, setEntries] = useState([]);
-  const [loading, setLoading] = useState(true);
+const RssViewer = ({ initialEntries, initialStats, setEntries: setParentEntries, setStats: setParentStats }) => {
+  const [entries, setEntries] = useState(initialEntries);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0);
+  const [totalPages, setTotalPages] = useState(Math.ceil(initialStats.totalEntries / ITEMS_PER_PAGE));
   const [searchTerm, setSearchTerm] = useState('');
   const [sortOrder, setSortOrder] = useState('desc');
-  const [totalEntries, setTotalEntries] = useState(0);
-  const [uniqueSources, setUniqueSources] = useState([]);
-  const [filteredSources, setFilteredSources] = useState([]);
+  const [totalEntries, setTotalEntries] = useState(initialStats.totalEntries);
+  const [uniqueSources, setUniqueSources] = useState(initialStats.uniqueSources);
+  const [filteredSources, setFilteredSources] = useState(initialStats.uniqueSources);
   const [selectedSource, setSelectedSource] = useState('');
   const [dateRange, setDateRange] = useState('');
   const [activeKeyword, setActiveKeyword] = useState('');
